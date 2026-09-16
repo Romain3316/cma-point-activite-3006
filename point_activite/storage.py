@@ -110,6 +110,48 @@ class Store:
                          created_at=r['created_at'], updated_at=r['updated_at'])
                     for r in db.execute('SELECT * FROM entries')]
 
+    def history_imported(self):
+        with self.connect() as db:
+            return bool(db.execute("SELECT 1 FROM metadata WHERE key='seed_v1'").fetchone())
+
+    def install_history(self, raw):
+        from point_activite.import_history import read_history_archive
+        import shutil
+        import tempfile
+        data, files = read_history_archive(raw)
+        target = self.root / 'seed'
+        moved = False
+        try:
+            with tempfile.TemporaryDirectory(dir=self.root) as temp:
+                staging = Path(temp) / 'seed'
+                staging.mkdir()
+                for name, content in files.items():
+                    destination = staging / name
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    destination.write_bytes(content)
+                with self.connect() as db:
+                    db.execute('BEGIN IMMEDIATE')
+                    if db.execute("SELECT 1 FROM metadata WHERE key='seed_v1'").fetchone():
+                        return 0
+                    if target.exists():
+                        raise ValueError('Un dossier historique existe déjà. L’import ne l’a pas remplacé.')
+                    existing = {r[0] for r in db.execute('SELECT id FROM entries')}
+                    if existing.intersection(r['id'] for r in data['records']):
+                        raise ValueError('Des identifiants existent déjà. L’import est annulé pour préserver les contributions.')
+                    stamp = datetime.now(timezone.utc).isoformat()
+                    for r in data['records']:
+                        payload = {k: r.get(k, '') for k in FIELDS}
+                        db.execute('INSERT INTO entries VALUES (?,?,1,?,?)',
+                                   (r['id'], json.dumps(payload, ensure_ascii=False), stamp, stamp))
+                    staging.rename(target)
+                    moved = True
+                    db.execute("INSERT INTO metadata VALUES ('seed_v1',?)", (stamp,))
+        except Exception:
+            if moved:
+                shutil.rmtree(target)
+            raise
+        return len(data['records'])
+
     def save(self, values, actor, entry_id=None, expected_version=None):
         if not actor or not actor.strip():
             raise ValueError('Renseignez votre nom avant de contribuer.')

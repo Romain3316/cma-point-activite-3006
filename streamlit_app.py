@@ -332,6 +332,27 @@ elif page == 'Ajouter une contribution':
 
 else:
     st.title('Exports et sauvegarde')
+    st.subheader('Importer l’historique initial')
+    if store.history_imported():
+        st.success('L’historique initial est déjà importé. Aucun nouveau dépôt du ZIP n’est nécessaire pour cette instance.')
+    else:
+        st.write('Sélectionnez le paquet de démarrage ZIP complet, sans le décompresser. L’import conserve les contributions déjà saisies.')
+        history_zip = st.file_uploader('Paquet de démarrage ZIP', type=['zip'], key='history_zip')
+        st.caption('50 Mo maximum. Seul le dossier historique est importé ; le code contenu dans le paquet n’est pas exécuté.')
+        st.info('Les personnes ayant accès à cette application pourront consulter les données importées. Réservez son accès à votre équipe avant l’import.')
+        if st.button('Importer l’historique', type='primary', disabled=history_zip is None or not actor):
+            try:
+                with st.spinner('Import de l’historique et des visuels…'):
+                    imported = store.install_history(history_zip.getvalue())
+            except (ValueError, OSError) as exc:
+                st.error(str(exc))
+            else:
+                st.session_state['flash'] = f'{imported} contribution(s) importée(s). Retrouvez-les dans la base de connaissances.'
+                st.rerun()
+        if not actor:
+            st.caption('Renseignez votre prénom et nom dans le menu de gauche pour importer.')
+    st.warning('Sur Streamlit Community Cloud, le stockage local de cette V1 n’est pas permanent. Une recréation de l’instance peut faire perdre les données importées et les nouvelles contributions. Téléchargez une sauvegarde ; un stockage externe reste nécessaire pour l’usage quotidien.')
+    st.subheader('Export Excel')
     st.write('Téléchargez la base complète pour la consulter dans Excel ou la charger manuellement dans CMAssistant.')
     download_xlsx(records,'Toute la base — versions actuelles','full_export')
     st.caption('Onglets Base, Actions et Guide. Pour un export ciblé, utilisez les filtres de la base de connaissances.')

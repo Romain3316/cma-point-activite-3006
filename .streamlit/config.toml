@@ -7,7 +7,7 @@ font = "sans serif"
 
 [server]
 address = "127.0.0.1"
-maxUploadSize = 10
+maxUploadSize = 50
 headless = true
 enableXsrfProtection = true
 

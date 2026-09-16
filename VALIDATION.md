@@ -2,7 +2,8 @@
 
 Vérifié le 16 septembre 2026 avec Streamlit 1.64.0.
 
-- 9 tests automatisés réussis : navigation des six espaces, contribution, modification, lecture, garde d’accès, recherche, dates d’absence, conflit d’écriture, reprise sans doublon, sauvegarde SQLite et export Excel.
+- 15 tests automatisés réussis : navigation des six espaces, contribution, modification, lecture, garde d’accès, recherche, dates d’absence, conflit d’écriture, reprise sans doublon, sauvegarde SQLite, export Excel et import ZIP.
+- Import ZIP : vérification des chemins et du format, conservation des contributions existantes, rejet des collisions d’identifiants, présence des visuels et second import sans doublon. Aucun code du ZIP n’est installé ou exécuté.
 - Reprise de fiches : les tests vérifient l’absence de doublons et la conservation des modifications après redémarrage.
 - Export relu : dates Excel natives, texte conservé, filtres et en-têtes figés. Les textes commençant par `=` restent du texte et ne deviennent pas des formules.
 - Les tests publiés utilisent uniquement des contributions fictives.

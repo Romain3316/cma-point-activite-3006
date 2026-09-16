@@ -39,6 +39,14 @@ Le dépôt contient uniquement le logiciel, sa documentation et des tests fictif
 
 Les dates, sources et réserves attachées aux fiches sont conservées lors de l’import. Une fiche sans date précise reste accessible dans la recherche générale. Les pièces jointes et les fichiers sources éventuels restent dans le dossier local de données, exclu de Git.
 
+### Import depuis Streamlit Community Cloud
+
+Dans **Exports et sauvegarde**, sélectionner le paquet ZIP complet puis **Importer l’historique**. Le fichier n’a pas besoin d’être décompressé ni ajouté à GitHub. Renseigner son nom dans le menu avant l’import. Seul le dossier `data/seed` est installé. Les contributions déjà saisies sont conservées et le même historique ne peut pas être importé deux fois dans une instance. La limite du ZIP est 50 Mo ; celle des pièces jointes de contribution reste 10 Mo.
+
+Restreindre l’accès à l’application aux utilisateurs autorisés avant de charger des données internes. Le dépôt public ne contient pas les données envoyées par l’interface.
+
+**Persistance :** l’import n’est pas nécessaire à chaque ouverture, mais Community Cloud ne garantit pas la conservation des fichiers locaux. Cette version SQLite est adaptée aux essais sur cette plateforme ; elle nécessite un stockage externe pour un usage quotidien durable. Une recréation de l’instance peut supprimer l’historique et les nouvelles contributions. Télécharger régulièrement la sauvegarde ZIP. Documentation : https://docs.streamlit.io/develop/concepts/connections/connecting-to-data
+
 ## Travail en équipe et hébergement
 
 Tous les collègues doivent se connecter à **la même instance** de l’application. Les données sont enregistrées dans une base SQLite commune, sur le disque persistant du serveur. Les écritures sont transactionnelles, avec un délai d’attente de 20 secondes et contrôle de version des fiches. Aucune base n’est stockée seulement dans la session Streamlit.
