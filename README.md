@@ -1,0 +1,1 @@
+# cma-point-activite-3006
