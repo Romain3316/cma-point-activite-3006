@@ -1,0 +1,14 @@
+services:
+  point-activite:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8501:8501"
+    volumes:
+      - ./data:/app/data
+    environment:
+      POINT_ACTIVITE_AUTH: ${POINT_ACTIVITE_AUTH:-local}
+      POINT_ACTIVITE_ALLOWED_EMAILS: ${POINT_ACTIVITE_ALLOWED_EMAILS:-}
+    # Pour OIDC, décommenter après création de secrets.toml :
+    # volumes supplémentaires à ajouter à la liste ci-dessus :
+    # - ./.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro

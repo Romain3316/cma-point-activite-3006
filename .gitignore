@@ -216,3 +216,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Point activité : données et configuration locales
+data/
+!data/.gitkeep
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.sqlite3*
+.streamlit/secrets.toml
+.env
+*.zip
+*.xlsx

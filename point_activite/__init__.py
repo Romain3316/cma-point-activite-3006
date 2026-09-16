@@ -1,0 +1,1 @@
+"""Point activité CMA."""
