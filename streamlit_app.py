@@ -12,22 +12,15 @@ from zoneinfo import ZoneInfo
 import streamlit as st
 
 from point_activite.excel import export_excel
+from point_activite.branding import apply_branding, sidebar_brand, page_header
 from point_activite.storage import Store, THEMES, TYPES, STATUSES, ConflictError, filter_records
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = Path(os.environ.get('POINT_ACTIVITE_DATA_DIR', str(ROOT / 'data')))
 TODAY = datetime.now(ZoneInfo('Europe/Paris')).date()
-st.set_page_config(page_title='Point activité · CMA', page_icon='📘', layout='wide')
-st.markdown('''<style>
-.stApp {background:#f5f7fb}
-[data-testid="stSidebar"] {background:#eaf0f7}
-h1,h2,h3 {color:#123b65}
-.block-container {max-width:1400px;padding-top:2rem}
-[data-testid="stMetric"] {background:white;border:1px solid #dde5ee;border-radius:12px;padding:14px}
-[data-testid="stExpander"] {background:white;border:1px solid #dce5ef;border-radius:10px}
-[data-testid="stText"] pre {white-space:pre-wrap;overflow-wrap:anywhere}
-.stButton>button[kind="primary"] {background:#123b65;border-color:#123b65}
-</style>''', unsafe_allow_html=True)
+st.set_page_config(page_title='Le point 3006 · CMA', page_icon=':material/support_agent:', layout='wide')
+apply_branding()
+page_header()
 
 
 def identity():
@@ -57,7 +50,7 @@ def identity():
     return st.sidebar.text_input('Votre prénom et nom', key='actor', placeholder='Pour contribuer et suivre vos lectures').strip()
 
 
-st.sidebar.markdown('## CMA\n**Point activité**')
+sidebar_brand()
 actor = identity()  # No records are loaded before the authentication gate.
 store = Store(DATA_DIR)
 pages = ['Contributions du jour', 'Base de connaissances', 'Retour d’absence', 'Actions', 'Ajouter une contribution', 'Exports et sauvegarde']

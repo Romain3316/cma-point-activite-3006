@@ -1,6 +1,8 @@
-# Point activité CMA
+# Le point 3006 · CMA
 
 Application Python / Streamlit pour conserver les contributions quotidiennes, retrouver les informations après une absence et exporter une base Excel destinée notamment au chargement manuel dans CMAssistant.
+
+L’interface reprend le logo régional et les couleurs du site CMA Nouvelle-Aquitaine, avec une signature « Le point 3006 ». Le détail des sources visuelles figure dans `assets/README.md`. L’affichage s’adapte aux petits écrans.
 
 ## Démarrer la première version
 

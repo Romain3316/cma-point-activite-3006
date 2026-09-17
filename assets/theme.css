@@ -1,0 +1,67 @@
+:root {
+  --cma-blue: #0f3250;
+  --cma-coral: #cd493d;
+  --cma-light: #e7f1f4;
+  --cma-ink: #19364d;
+}
+.stApp { background: #f5f7fa; }
+[data-testid="stHeader"] { background: #f5f7fa; }
+.block-container { max-width: 1420px; padding-top: 2rem; padding-bottom: 3rem; }
+h1, h2, h3 { color: var(--cma-blue); letter-spacing: -.025em; }
+h1 { font-size: 1.95rem !important; font-weight: 750 !important; }
+h2 { font-size: 1.4rem !important; }
+h3 { font-size: 1.15rem !important; }
+[data-testid="stSidebar"] { background: #fff; border-right: 1px solid #dce5ec; }
+[data-testid="stSidebarUserContent"] { padding-top: 1.5rem; }
+.cma-sidebar-brand { padding: 0 0 1.25rem; margin-bottom: 1rem; border-bottom: 1px solid #e3eaf0; }
+.cma-sidebar-brand img { display: block; width: 155px; height: 125px; object-fit: contain; object-position: left center; margin-bottom: 14px; }
+.cma-sidebar-name { color: var(--cma-blue); font-size: 1.22rem; font-weight: 750; letter-spacing: -.035em; }
+.cma-sidebar-name span { color: var(--cma-coral); }
+.cma-sidebar-subtitle { color: #587083; font-size: .8rem; margin-top: 3px; }
+[data-testid="stSidebar"] [role="radiogroup"] { gap: 5px; }
+[data-testid="stSidebar"] [role="radiogroup"] > label {
+  border: 1px solid transparent; border-radius: 9px; padding: 10px 8px;
+  margin: 0; transition: background .15s ease;
+}
+[data-testid="stSidebar"] [role="radiogroup"] > label:hover { background: #f4f7fa; }
+[data-testid="stSidebar"] [role="radiogroup"] > label:has(input:checked) {
+  background: var(--cma-light); border-color: #d2e2e8; box-shadow: inset 3px 0 0 var(--cma-coral);
+}
+.cma-banner {
+  background: var(--cma-blue); color: #fff; border-radius: 16px;
+  border-top: 4px solid var(--cma-coral); padding: 26px 32px;
+  display: flex; justify-content: space-between; align-items: center; gap: 24px;
+  margin-bottom: 18px; box-shadow: 0 8px 26px #0f32500d;
+}
+.cma-eyebrow { font-size: .67rem; font-weight: 650; letter-spacing: .11em; color: #e0edf2; }
+.cma-eyebrow span { display: inline-block; margin-left: 12px; padding-left: 12px; border-left: 1px solid #58758d; color: #c7dce7; }
+.cma-banner-title { margin-top: 12px; font-size: clamp(1.8rem, 3.2vw, 2.6rem); letter-spacing: -.05em; line-height: 1.15; font-weight: 450; }
+.cma-banner-title strong { font-weight: 800; }
+.cma-dot { color: #ff9b8e; }
+.cma-banner-copy p { color: #e1edf3; margin: 9px 0 0; font-size: .92rem; }
+.cma-callout { flex-shrink: 0; padding-left: 28px; border-left: 1px solid #4b6880; }
+.cma-callout-top { display: flex; gap: 9px; align-items: center; color: #d3e5ed; font-size: .61rem; font-weight: 600; letter-spacing: .08em; }
+.cma-callout-top svg { width: 21px; height: 24px; color: #ff9b8e; }
+.cma-callout-number { font-size: 3.8rem; line-height: 1.15; font-weight: 800; letter-spacing: -.055em; color: #fff; }
+.cma-callout-caption { color: #d6e6ee; font-size: .74rem; }
+[data-testid="stMetric"] { background: #fff; border: 1px solid #dce5ed; border-top: 3px solid var(--cma-blue); border-radius: 11px; padding: 16px 18px; }
+[data-testid="stMetricLabel"] { color: #587083; }
+[data-testid="stMetricValue"] { color: var(--cma-blue); font-weight: 750; }
+[data-testid="stExpander"] { background: #fff; border: 1px solid #dce5ed; border-radius: 11px; }
+[data-testid="stExpander"] summary { padding: 14px 16px; }
+[data-testid="stExpander"] summary:hover { color: var(--cma-blue); background: #f0f6f8; border-radius: 11px; }
+[data-testid="stForm"] { background: #fff; border-color: #dce5ed; border-radius: 14px; }
+[data-testid="stText"] pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.stButton > button, .stDownloadButton > button, .stFormSubmitButton > button { border-radius: 8px; font-weight: 600; min-height: 2.6rem; }
+.stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primaryFormSubmit"] { background: var(--cma-blue); border-color: var(--cma-blue); color: #fff; }
+.stButton > button[kind="primary"]:hover, .stFormSubmitButton > button[kind="primaryFormSubmit"]:hover { background: #194a70; border-color: #194a70; }
+.stDownloadButton > button { background: #fff; border-color: #bccedb; color: var(--cma-blue); }
+[data-testid="stWidgetLabel"] p { font-weight: 600; color: var(--cma-ink); }
+@media (max-width: 760px) {
+  .block-container { padding-left: 1rem; padding-right: 1rem; padding-top: 1.5rem; }
+  .cma-banner { padding: 22px; gap: 16px; align-items: flex-start; }
+  .cma-callout { display: none; }
+  .cma-eyebrow { font-size: .59rem; }
+  .cma-eyebrow span { display: block; margin: 6px 0 0; padding: 0; border: 0; }
+  h1 { font-size: 1.65rem !important; }
+}
