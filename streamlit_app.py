@@ -18,7 +18,7 @@ from point_activite.storage import Store, THEMES, TYPES, STATUSES, ConflictError
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = Path(os.environ.get('POINT_ACTIVITE_DATA_DIR', str(ROOT / 'data')))
 TODAY = datetime.now(ZoneInfo('Europe/Paris')).date()
-st.set_page_config(page_title='Le point 3006 · CMA', page_icon=':material/support_agent:', layout='wide')
+st.set_page_config(page_title='Le point service client · CMA', page_icon=':material/support_agent:', layout='wide')
 apply_branding()
 page_header()
 
