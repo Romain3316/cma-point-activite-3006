@@ -18,7 +18,7 @@ from point_activite.storage import Store, THEMES, TYPES, STATUSES, ConflictError
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = Path(os.environ.get('POINT_ACTIVITE_DATA_DIR', str(ROOT / 'data')))
 TODAY = datetime.now(ZoneInfo('Europe/Paris')).date()
-st.set_page_config(page_title='Le point service client · CMA', page_icon=':material/support_agent:', layout='wide')
+st.set_page_config(page_title='Service client régional · CMA', page_icon=':material/support_agent:', layout='wide')
 apply_branding()
 page_header()
 
@@ -69,10 +69,34 @@ def safe_file(relative):
     return path if path.is_relative_to(DATA_DIR.resolve()) and path.is_file() else None
 
 
-def download_xlsx(records, description, key):
-    st.download_button('Exporter les résultats en Excel', export_excel(records, description),
-                       file_name=f'Point_activite_{TODAY.isoformat()}.xlsx',
+def download_xlsx(records, description, key, label='Exporter les résultats en Excel', filename=None):
+    st.download_button(label, export_excel(records, description),
+                       file_name=filename or f'Point_activite_{TODAY.isoformat()}.xlsx',
                        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', key=key)
+
+
+def set_period(key, start, end):
+    st.session_state[key] = (start, end)
+
+
+def period_picker(label, key, default, shortcuts=False):
+    if shortcuts:
+        last_monday = TODAY - timedelta(days=TODAY.weekday()+7)
+        for col, text, start, end in zip(st.columns(3),
+                ['Les 7 derniers jours', 'Les 14 derniers jours', 'La semaine dernière'],
+                [TODAY-timedelta(days=7), TODAY-timedelta(days=14), last_monday],
+                [TODAY-timedelta(days=1), TODAY-timedelta(days=1), last_monday+timedelta(days=6)]):
+            col.button(text, key=key+'_'+text, on_click=set_period, args=(key,start,end), use_container_width=True)
+    dates = st.date_input(label, value=default, format='DD/MM/YYYY', key=key,
+                          help='Dans le calendrier, cliquez sur la date de début puis sur la date de fin. Pour un seul jour, sélectionnez deux fois la même date.')
+    if not dates or len(dates) != 2:
+        st.info('Sélectionnez aussi la date de fin dans le calendrier pour afficher la période complète.')
+        return None
+    start, end = dates
+    if start > end:
+        st.error('La date de début doit précéder la date de fin.')
+        return None
+    return start, end
 
 
 @st.cache_data(show_spinner=False)
@@ -144,7 +168,7 @@ def form(record=None):
         st.rerun()
 
 
-def show_records(records, prefix, group=False):
+def show_records(records, prefix, group=False, browse_all=False):
     if not records:
         st.info('Aucune contribution pour cette sélection.')
         return
@@ -154,21 +178,38 @@ def show_records(records, prefix, group=False):
     if group:
         selected = sorted(selected, key=lambda r:(r['theme'],r.get('date') or '',r['id']))
     st.caption(f'{len(selected)} contribution(s) affichable(s)')
-    pages_count = max(1, (len(selected)+19)//20)
-    pagination_key = prefix+'_pagination'
-    if st.session_state.get(pagination_key, 1) > pages_count:
-        st.session_state[pagination_key] = 1
-    p = st.number_input('Page', min_value=1, max_value=pages_count, step=1, key=pagination_key)
+    if not selected:
+        st.info('Toutes les contributions de cette sélection ont été lues.')
+        return
+    if browse_all:
+        by_id = {r['id']: r for r in selected}
+        selection_key = prefix+'_record'
+        if st.session_state.get(selection_key) not in by_id:
+            st.session_state.pop(selection_key, None)
+        def record_label(ident):
+            r = by_id[ident]
+            return f"{display_date(r.get('date'))} — {r['title']} · {r['theme']} · {ident}"
+        ident = st.selectbox('Choisir une information — tous les résultats', list(by_id),
+                             format_func=record_label, key=selection_key,
+                             help='Faites défiler la liste ou tapez un titre, une date ou une thématique pour y accéder directement.')
+        displayed = [by_id[ident]]
+    else:
+        pages_count = max(1, (len(selected)+19)//20)
+        pagination_key = prefix+'_pagination'
+        if st.session_state.get(pagination_key, 1) > pages_count:
+            st.session_state[pagination_key] = 1
+        p = st.number_input('Page', min_value=1, max_value=pages_count, step=1, key=pagination_key)
+        displayed = selected[(p-1)*20:p*20]
     seed = DATA_DIR / 'seed/history.json'
     images = image_index(str(seed), seed.stat().st_mtime if seed.exists() else 0)
     current_theme = None
-    for r in selected[(p-1)*20:p*20]:
+    for r in displayed:
         if group and current_theme != r['theme']:
             st.subheader(r['theme'])
             current_theme = r['theme']
         state = ' · Lu' if read.get(r['id']) == r['version'] else ''
         label = f"{display_date(r.get('date'))} · {r['title']}{state}"
-        with st.expander(label):
+        with st.expander(label, expanded=browse_all):
             st.caption(f"{r['theme']} · {r['type']} · {r.get('author') or 'Auteur non précisé'} · {r['id']}")
             st.text(r['content'])
             if r.get('sub'):
@@ -289,24 +330,26 @@ elif page == 'Base de connaissances':
     st.subheader(f'{len(chosen)} résultat(s)')
     description = f'Recherche : {query or "tous mots"} ; thématiques : {", ".join(themes) or "toutes"} ; types : {", ".join(types) or "tous"} ; personne : {who or "toutes"} ; période : {start or "sans borne"} au {end or "sans borne"} inclus ; sans date uniquement : {undated}'
     download_xlsx(chosen,description,'search_export')
-    show_records(chosen,'search')
+    st.caption('L’export contient tous les résultats de la recherche, quelle que soit la fiche ouverte ci-dessous.')
+    show_records(chosen,'search',browse_all=True)
 
 elif page == 'Retour d’absence':
     st.title('Retour d’absence')
     st.write('Retrouvez ce qui a été communiqué pendant votre absence, regroupé par thématique.')
-    c1,c2=st.columns(2)
-    start=c1.date_input('Début de l’absence',TODAY-timedelta(days=7),key='absence_start')
-    end=c2.date_input('Date de retour',TODAY,key='absence_end')
-    include=st.checkbox('Inclure aussi le jour du retour',key='include_return')
-    if start>end:
-        st.error('Le retour doit être postérieur ou égal au début de l’absence.')
+    st.write('Je suis en congés du… au…')
+    period = period_picker('Mes dates de congés — premier et dernier jour inclus',
+                           'absence_period', (TODAY-timedelta(days=7),TODAY-timedelta(days=1)), shortcuts=True)
+    if period is None:
         st.stop()
-    chosen=filter_records(records,start=start,end=end,end_inclusive=include)
-    st.caption('Début inclus. '+('Jour du retour inclus.' if include else 'Jour du retour exclu.'))
+    start, end = period
+    chosen=filter_records(records,start=start,end=end)
+    st.success(f'Congés du {start:%d/%m/%Y} au {end:%d/%m/%Y} inclus · {(end-start).days+1} jour(s) · {len(chosen)} contribution(s)')
+    st.caption('La date de fin est votre dernier jour de congé, et non votre jour de reprise.')
     unknown=sum(not r.get('date') for r in records)
     if unknown:
         st.caption(f'{unknown} fiche(s) sans date précise sont consultables dans la base et ne peuvent pas être affectées à cette période.')
-    download_xlsx(chosen,f'Absence du {start} inclus au {end} '+('inclus' if include else 'exclu'),'absence_export')
+    download_xlsx(chosen,f'Congés du {start} au {end} — début et fin inclus','absence_export',
+                  filename=f'Point_activite_conges_{start}_{end}.xlsx')
     show_records(chosen,'absence',group=True)
 
 elif page == 'Actions':
@@ -346,8 +389,19 @@ else:
             st.caption('Renseignez votre prénom et nom dans le menu de gauche pour importer.')
     st.warning('Sur Streamlit Community Cloud, le stockage local de cette V1 n’est pas permanent. Une recréation de l’instance peut faire perdre les données importées et les nouvelles contributions. Téléchargez une sauvegarde ; un stockage externe reste nécessaire pour l’usage quotidien.')
     st.subheader('Export Excel')
-    st.write('Téléchargez la base complète pour la consulter dans Excel ou la charger manuellement dans CMAssistant.')
-    download_xlsx(records,'Toute la base — versions actuelles','full_export')
+    st.write('Téléchargez toute la base ou les informations communiquées entre deux dates.')
+    export_scope = st.radio('Périmètre de l’export', ['Toute la base', 'De date à date'], horizontal=True, key='export_scope')
+    if export_scope == 'Toute la base':
+        download_xlsx(records,'Toute la base — versions actuelles','full_export',label='Exporter toute la base en Excel')
+    else:
+        period = period_picker('Période à exporter — début et fin inclus', 'export_period',
+                               (TODAY-timedelta(days=29),TODAY))
+        if period is not None:
+            start, end = period
+            chosen = filter_records(records,start=start,end=end)
+            st.caption(f'{len(chosen)} contribution(s) du {start:%d/%m/%Y} au {end:%d/%m/%Y} inclus. Les fiches sans date restent disponibles dans l’export total.')
+            download_xlsx(chosen,f'Période du {start} au {end} — début et fin inclus','period_export',
+                          label='Exporter cette période en Excel',filename=f'Point_activite_{start}_{end}.xlsx')
     st.caption('Onglets Base, Actions et Guide. Pour un export ciblé, utilisez les filtres de la base de connaissances.')
     st.subheader('Sauvegarde complète')
     st.write('Conserve les contributions, les anciennes versions, les lectures et les pièces jointes pour une restauration.')

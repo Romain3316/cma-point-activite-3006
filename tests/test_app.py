@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import date
 
 from streamlit.testing.v1 import AppTest
 
@@ -58,3 +59,80 @@ def test_invalid_auth_mode_loads_no_data(tmp_path,monkeypatch):
     at=AppTest.from_file(str(APP)).run()
     assert at.error
     assert not (tmp_path/'uncreated/point_activite.sqlite3').exists()
+
+
+def test_search_dropdown_contains_all_results_and_opens_last(tmp_path,monkeypatch):
+    at=app(tmp_path,monkeypatch)
+    store=Store(tmp_path)
+    for i in range(25):
+        store.save(dict(date='2026-09-14',title=f'Fiche test {i:02}',content=f'Contenu complet {i:02}',
+                        theme='À qualifier',type='Information'),'Alice')
+    at.radio(key='page').set_value('Base de connaissances').run()
+    selector=at.selectbox(key='search_record')
+    assert len(selector.options)==26
+    assert len(at.number_input)==0
+    last=sorted(store.all(),key=lambda r:(r['date'],r['created_at'],r['id']),reverse=True)[-1]
+    selector.set_value(last['id']).run()
+    assert not at.exception
+    assert last['content'] in [t.value for t in at.text]
+    at.text_input(key='search_query').set_value('Salesforce').run()
+    assert len(at.selectbox(key='search_record').options)==1
+    assert not at.exception
+    at.text_input(key='actor').set_value('Alice').run()
+    chosen=next(r for r in store.all() if r['title']=='Formation Salesforce')
+    at.button(key='search_read_'+chosen['id']).click().run()
+    at.checkbox(key='search_unread').set_value(True).run()
+    assert not at.exception
+    assert not [s for s in at.selectbox if s.key=='search_record']
+
+
+def test_absence_calendar_includes_last_day_and_handles_partial_range(tmp_path,monkeypatch):
+    at=app(tmp_path,monkeypatch)
+    at.radio(key='page').set_value('Retour d’absence').run()
+    at.date_input(key='absence_period').set_value((date(2026,9,15),date(2026,9,15))).run()
+    assert not at.exception
+    assert len(at.expander)==1  # A single-day holiday includes that day's contribution.
+    assert any('1 contribution(s)' in m.value for m in at.success)
+    at.date_input(key='absence_period').set_value((date(2026,9,15),)).run()
+    assert not at.exception
+    assert len(at.expander)==0
+    assert any('date de fin' in m.value for m in at.info)
+    at.button(key='absence_period_La semaine dernière').click().run()
+    assert not at.exception
+    start,end=at.date_input(key='absence_period').value
+    assert start.weekday()==0 and end.weekday()==6 and (end-start).days==6
+
+
+def test_period_export_includes_boundaries_and_total_keeps_undated(tmp_path,monkeypatch):
+    from point_activite import excel
+    from io import BytesIO
+    from openpyxl import load_workbook
+    exported=[]
+    original=excel.export_excel
+    def capture(records,description):
+        result=original(records,description)
+        exported.append((description,load_workbook(BytesIO(result))))
+        return result
+    monkeypatch.setattr(excel,'export_excel',capture)
+    at=app(tmp_path,monkeypatch)
+    s=Store(tmp_path)
+    for day in ['2026-09-13','2026-09-14','2026-09-16','2026-09-17']:
+        s.save(dict(date=day,title=day,content='Test période',theme='À qualifier',type='Information'),'Alice')
+    ident=s.save(dict(date='2026-09-18',title='Sans date',content='Archive',theme='À qualifier',type='Information'),'Alice')
+    r=next(r for r in s.all() if r['id']==ident)
+    s.save(dict(r,date=None),'Alice',ident,r['version'])
+    at.radio(key='page').set_value('Exports et sauvegarde').run()
+    assert exported[-1][1]['Base'].max_row==7
+    at.radio(key='export_scope').set_value('De date à date').run()
+    at.date_input(key='export_period').set_value((date(2026,9,14),date(2026,9,16))).run()
+    assert not at.exception
+    description,wb=exported[-1]
+    assert wb['Base'].max_row==4
+    assert {r[1].value.date() for r in list(wb['Base'].rows)[1:]}=={date(2026,9,14),date(2026,9,15),date(2026,9,16)}
+    assert '2026-09-14' in description and '2026-09-16' in description
+    count=len(exported)
+    at.date_input(key='export_period').set_value((date(2026,9,14),)).run()
+    assert not at.exception
+    assert len(exported)==count  # No misleading download for an incomplete period.
+    at.radio(key='export_scope').set_value('Toute la base').run()
+    assert exported[-1][1]['Base'].max_row==7

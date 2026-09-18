@@ -87,7 +87,7 @@ def export_excel(records, description='Toute la base'):
             ['Personnes', 'Une personne citée dans une fiche historique n’est pas nécessairement responsable de l’action.'],
             ['Pièces jointes', 'Fichiers consultables dans l’application et dans la sauvegarde ZIP complète.'],
             ['Historique', 'Les versions précédentes sont conservées dans l’application. Cet export contient les versions actuelles.'],
-            ['Retour d’absence', 'Par défaut : début inclus, jour de retour exclu. Le périmètre ci-dessus précise la sélection.'],
+            ['Retour d’absence', 'Le premier et le dernier jour de congé sélectionnés sont inclus. La date de fin est le dernier jour d’absence. Le périmètre ci-dessus précise la sélection.'],
         ], [28, 110], ()),
     ]
     styles = f'''<styleSheet xmlns="{NS}">

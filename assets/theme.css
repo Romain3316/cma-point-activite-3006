@@ -42,7 +42,7 @@ h3 { font-size: 1.15rem !important; }
 .cma-callout { flex-shrink: 0; padding-left: 28px; border-left: 1px solid #4b6880; }
 .cma-callout-top { display: flex; gap: 9px; align-items: center; color: #d3e5ed; font-size: .61rem; font-weight: 600; letter-spacing: .08em; }
 .cma-callout-top svg { width: 21px; height: 24px; color: #ff9b8e; }
-.cma-callout-number { font-size: 3.8rem; line-height: 1.15; font-weight: 800; letter-spacing: -.055em; color: #fff; }
+.cma-callout-name { font-size: 1.65rem; line-height: 1.15; font-weight: 750; letter-spacing: -.035em; color: #fff; margin: 8px 0; }
 .cma-callout-caption { color: #d6e6ee; font-size: .74rem; }
 [data-testid="stMetric"] { background: #fff; border: 1px solid #dce5ed; border-top: 3px solid var(--cma-blue); border-radius: 11px; padding: 16px 18px; }
 [data-testid="stMetricLabel"] { color: #587083; }

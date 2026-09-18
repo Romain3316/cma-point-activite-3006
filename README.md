@@ -1,8 +1,8 @@
-# Le point 3006 · CMA
+# Service client régional · CMA
 
 Application Python / Streamlit pour conserver les contributions quotidiennes, retrouver les informations après une absence et exporter une base Excel destinée notamment au chargement manuel dans CMAssistant.
 
-L’interface reprend le logo régional et les couleurs du site CMA Nouvelle-Aquitaine, avec une signature « Le point 3006 ». Le détail des sources visuelles figure dans `assets/README.md`. L’affichage s’adapte aux petits écrans.
+L’interface reprend le logo régional et les couleurs du site CMA Nouvelle-Aquitaine, sous le nom « Service client régional ». Le détail des sources visuelles figure dans `assets/README.md`. L’affichage s’adapte aux petits écrans.
 
 ## Démarrer la première version
 
@@ -27,12 +27,12 @@ python -m streamlit run streamlit_app.py
 ## Utilisation quotidienne
 
 - **Contributions du jour** : date du jour par défaut, calendrier et liste de toutes les dates présentes. Ajouter une information depuis cette page ou le menu dédié.
-- **Base de connaissances** : recherche combinée par mots-clés, thématiques, types, personne ou équipe et période. Les accents et majuscules sont ignorés ; plusieurs mots sont combinés avec ET. Sans filtre de période, les informations sans date restent incluses.
-- **Retour d’absence** : début inclus, retour exclu par défaut ; option pour inclure le jour du retour. Les résultats sont regroupés par thématique. Les fiches sans date précise sont signalées à part.
+- **Base de connaissances** : recherche combinée par mots-clés, thématiques, types, personne ou équipe et période. Une liste déroulante contient tous les résultats, sans pagination ; sélectionner une fiche affiche son contenu complet. Il est possible de taper dans la liste pour trouver une date ou un titre. Les accents et majuscules sont ignorés dans le moteur de recherche ; plusieurs mots sont combinés avec ET. Sans filtre de période, les informations sans date restent incluses. L’export porte sur tous les résultats filtrés, et non sur la seule fiche ouverte.
+- **Retour d’absence** : sélectionner dans un seul calendrier le premier et le dernier jour de congé, tous deux inclus. Des raccourcis proposent les 7 ou 14 derniers jours et la semaine précédente. La date de fin est le dernier jour d’absence, pas le jour de reprise. Les résultats sont regroupés par thématique. Les fiches sans date précise sont signalées à part.
 - **Actions** : filtrer par avancement, ouvrir une fiche, puis Modifier pour mettre à jour le statut.
 - **Lecture** : marquer une fiche comme lue. Une modification la rend à nouveau non lue. En mode local, réutiliser exactement le même nom.
 - **Modifier** : les versions précédentes restent consultables. Si deux collègues modifient la même version, la seconde sauvegarde est refusée pour éviter d’écraser la première.
-- **Export Excel** : toute la base ou les résultats d’une recherche, d’une journée ou d’une absence. Les trois onglets sont Base, Actions et Guide. Dates Excel natives, filtres et en-têtes figés. Les résultats sont classés par thématique puis date. Le fichier est une extraction des versions actuelles ; les recherches interactives se font dans l’application.
+- **Export Excel** : depuis Exports et sauvegarde, choisir « Toute la base » ou « De date à date ». Pour une période, sélectionner le début et la fin inclus dans le calendrier ; le nombre de fiches retenues s’affiche avant téléchargement. Les fiches sans date restent dans l’export total. Les exports depuis la recherche, une journée ou une absence restent disponibles. Les trois onglets sont Base, Actions et Guide. Dates Excel natives, filtres et en-têtes figés. Les résultats sont classés par thématique puis date. Le fichier est une extraction des versions actuelles ; les recherches interactives se font dans l’application.
 - **Pièces jointes** : PDF, PNG et JPG, 10 Mo maximum chacune. Les images historiques sont visibles dans les fiches. Les nouveaux fichiers sont téléchargeables. L’export Excel référence les fichiers ; la sauvegarde ZIP les conserve intégralement.
 
 ## Reprise de l’historique
